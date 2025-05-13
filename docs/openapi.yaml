@@ -1,0 +1,86 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contacts API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: |
+    API для управления списком контактов пользователей.
+    Поддерживает операции создания, чтения, обновления и удаления контактов,
+    а также аутентификацию и авторизацию пользователей.
+tags:
+  - name: Contacts
+    description: Операции с контактами
+  - name: Auth
+    description: Аутентификация и управление пользователями
+servers:
+  - url: http://localhost:3000
+  - url: https://nodejs-hw-mongodb-7-3c66.onrender.com
+paths:
+  /contacts:
+    get:
+      $ref: '../swagger/paths/contacts/get.yaml'
+    post:
+      $ref: '../swagger/paths/contacts/post.yaml'
+  /contacts/{contactId}:
+    get:
+      $ref: '../swagger/paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: '../swagger/paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: '../swagger/paths/contacts/{id}/delete.yaml'
+components:
+  schemas:
+    Contact:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: '6534528f7b7ee4545698a0c7'
+        name:
+          type: string
+          example: 'John Doe'
+        phoneNumber:
+          type: string
+          example: '+380501234567'
+        email:
+          type: string
+          example: 'john.doe@example.com'
+        isFavourite:
+          type: boolean
+          example: false
+        contactType:
+          type: string
+          enum: [work, home, personal]
+          example: 'personal'
+        userId:
+          type: string
+          example: '6534528f7b7ee4545698a0c8'
+        photo:
+          type: string
+          example: 'https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/contacts/photo.jpg'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+  responses:
+    UnauthorizedError:
+      description: Неавторизованный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: 'Not authorized'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

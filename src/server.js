@@ -4,6 +4,7 @@ import pino from 'pino-http';
 import cookieParser from 'cookie-parser';
 import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
+import apiDocsRouter from './routers/api-docs.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 import dotenv from 'dotenv';
@@ -20,9 +21,9 @@ const setupServer = () => {
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
+  app.use('/api-docs', apiDocsRouter);
 
   app.use(notFoundHandler);
-
   app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;

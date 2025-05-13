@@ -1,0 +1,44 @@
+tags:
+  - Contacts
+summary: Удалить контакт
+operationId: deleteContact
+description: Удаляет существующий контакт по ID
+security:
+  - bearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: ID контакта для удаления
+    schema:
+      type: string
+      format: objectId
+responses:
+  '204':
+    description: Контакт успешно удален (ответ без содержимого)
+  '401':
+    description: Неавторизованный запрос
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 401
+            message:
+              type: string
+              example: 'Not authorized'
+  '404':
+    description: Контакт не найден
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: 'Contact not found'
