@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import { User } from '../models/userModel.js';
 import { Session } from '../models/sessionModel.js';
 import createError from 'http-errors';
+import { generateResetToken, verifyResetToken } from '../utils/resetTokens.js';
+import { sendResetPasswordEmail } from './email.js';
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
@@ -138,4 +140,35 @@ export const validateAccessToken = async (accessToken) => {
   }
 
   return user;
+};
+
+export const sendPasswordResetEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createError(404, 'User not found!');
+  }
+
+  const resetToken = generateResetToken(email);
+
+  await sendResetPasswordEmail(email, resetToken);
+
+  return true;
+};
+
+export const resetPassword = async (token, newPassword) => {
+  const { email } = verifyResetToken(token);
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createError(404, 'User not found!');
+  }
+
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+  await User.findOneAndUpdate({ email }, { password: hashedPassword });
+
+  await Session.deleteMany({ userId: user._id });
+
+  return true;
 };

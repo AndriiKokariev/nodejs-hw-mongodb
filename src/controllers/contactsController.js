@@ -5,6 +5,7 @@ import {
   updateContact,
   deleteContact,
 } from '../services/contacts.js';
+import { uploadImageToCloudinary } from '../services/upload.js';
 import createError from 'http-errors';
 
 export const handleGetAllContacts = async (req, res, next) => {
@@ -50,13 +51,19 @@ export const handleCreateContact = async (req, res, next) => {
   const { name, phoneNumber, contactType, email, isFavourite } = req.body;
   const userId = req.user._id;
 
+  let photo = null;
+  if (req.file) {
+    photo = await uploadImageToCloudinary(req.file);
+  }
+
   const newContact = await createContact({
     name,
     phoneNumber,
     contactType,
     email,
-    isFavourite,
+    isFavourite: isFavourite === 'true' ? true : isFavourite,
     userId,
+    photo,
   });
 
   res.status(201).json({
@@ -70,7 +77,17 @@ export const handleUpdateContact = async (req, res, next) => {
   const { contactId } = req.params;
   const userId = req.user._id;
 
-  const updatedContact = await updateContact(contactId, req.body, userId);
+  const updateData = { ...req.body };
+
+  if (updateData.isFavourite !== undefined) {
+    updateData.isFavourite = updateData.isFavourite === 'true';
+  }
+
+  if (req.file) {
+    updateData.photo = await uploadImageToCloudinary(req.file);
+  }
+
+  const updatedContact = await updateContact(contactId, updateData, userId);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
